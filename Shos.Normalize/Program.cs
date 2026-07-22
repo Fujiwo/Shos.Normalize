@@ -43,7 +43,7 @@ static class Program
 
             Clipboard.SetText(text);
         } catch (Exception exception) {
-            ShowError($"An error occurred: {exception.Message}");
+            ShowError(exception.Message);
         }
     }
 
@@ -58,7 +58,7 @@ static class Program
     static void ShowError(string message)
     {
         (Console.ForegroundColor, Console.BackgroundColor) = (ConsoleColor.Red, ConsoleColor.Black);
-        Show(message);
+        Show($"An error occurred: {message}");
         Console.ResetColor();
     }
 
