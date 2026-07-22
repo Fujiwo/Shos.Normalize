@@ -1,11 +1,16 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 
 namespace Shos.Normalize;
 
 static class Program
 {
-    const string ApplicationName = nameof(Shos.Normalize);
+    const string ApplicationName = "Shos.Normalize";
+
+    static readonly Dictionary<char, char> characterTable = new() {
+        ['“'] = '"',
+        ['”'] = '"',
+        ['’'] = '\''
+    };
 
     [STAThread]
     static void Main()
@@ -34,16 +39,20 @@ static class Program
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var normalizedText = text.Normalize(NormalizationForm.FormKC)
-                                     .Replace('“', '"')
-                                     .Replace('”', '"')
-                                     .Replace('’', '\'');
-            Clipboard.SetText(normalizedText);
-        } catch (ExternalException exception) {
-            ShowError($"An error occurred: {exception.Message}");
+            text = Normalize(text);
+
+            Clipboard.SetText(text);
         } catch (Exception exception) {
             ShowError($"An error occurred: {exception.Message}");
         }
+    }
+
+    static string Normalize(string text)
+    {
+        text = text.Normalize(NormalizationForm.FormKC);
+        foreach (var pair in characterTable)
+            text = text.Replace(pair.Key, pair.Value);
+        return text;
     }
 
     static void ShowError(string message)
