@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shos.Normalize;
+using System.Reflection;
 
 namespace Shos.Normalize.Test;
 
@@ -99,7 +100,7 @@ public sealed class Test1
         ["？"] = "?",
         ["＠"] = "@",
         ["［"] = "[",
-        //["￥"] = @"\",
+        ["￥"] = @"\",
         ["］"] = "]",
         ["＾"] = "^",
         ["＿"] = "_",
@@ -166,8 +167,8 @@ public sealed class Test1
         ["ｬ"] = "ャ",
         ["ｭ"] = "ュ",
         ["ｮ"] = "ョ",
-        //["ﾞ"] = "゛",
-        //["ﾟ"] = "゜",
+        ["ﾞ"] = "゛",
+        ["ﾟ"] = "゜",
         ["ｰ"] = "ー",
     };
 
@@ -223,9 +224,32 @@ public sealed class Test1
     [TestMethod]
     public void DiacriticTest() => Test(diacriticTable);
 
+    [TestMethod]
+    public void ClipboardFormatsTest()
+    {
+        AssertSupportedClipboardFormats(true, DataFormats.UnicodeText);
+        AssertSupportedClipboardFormats(true, DataFormats.UnicodeText, DataFormats.Locale);
+        AssertSupportedClipboardFormats(false);
+        AssertSupportedClipboardFormats(false, DataFormats.Locale);
+        AssertSupportedClipboardFormats(false, DataFormats.Html);
+        AssertSupportedClipboardFormats(false, DataFormats.UnicodeText, DataFormats.Html);
+        AssertSupportedClipboardFormats(false, DataFormats.UnicodeText, DataFormats.Rtf);
+        AssertSupportedClipboardFormats(false, DataFormats.UnicodeText, DataFormats.FileDrop);
+        AssertSupportedClipboardFormats(false, DataFormats.UnicodeText, DataFormats.Bitmap);
+    }
+
     static void Test(Dictionary<string, string> table)
     {
         foreach (var pair in table)
             Assert.AreEqual(pair.Value, pair.Key.NormalizeEx(), $"Failed for '{pair.Key}'");
+    }
+
+    static void AssertSupportedClipboardFormats(bool expected, params string[] formats)
+    {
+        var programType = typeof(StringExtensions).Assembly.GetType("Shos.Normalize.Program");
+        var method = programType?.GetMethod("HasOnlySupportedTextFormats", BindingFlags.NonPublic | BindingFlags.Static);
+
+        Assert.IsNotNull(method, "Clipboard format validation method was not found.");
+        Assert.AreEqual(expected, (bool)method.Invoke(null, [formats])!);
     }
 }

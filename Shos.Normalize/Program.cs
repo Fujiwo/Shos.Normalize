@@ -12,12 +12,12 @@ public static class StringExtensions
     // This runs after NFKC normalization, so it can also "undo" or adjust
     // some of the results produced by NormalizationForm.FormKC.
     static readonly Dictionary<char, char> characterTable = new() {
-        ['￥'] = '\\', // Fullwidth yen sign -> ASCII backslash (JIS X 0201 keyboards map \ to ￥).
-        ['“'] = '"',   // Left double quotation mark -> ASCII double quote.
-        ['”'] = '"',   // Right double quotation mark -> ASCII double quote.
-        ['’'] = '\'',  // Right single quotation mark -> ASCII apostrophe.
-        ['ﾞ'] = '゛',   // Halfwidth voiced sound mark -> fullwidth voiced sound mark.
-        ['ﾟ'] = '゜'    // Halfwidth semi-voiced sound mark -> fullwidth semi-voiced sound mark.
+        ['¥'] = '\\', // NFKC fullwidth yen sign -> ASCII backslash.
+        ['“'] = '"' , // Left double quotation mark -> ASCII double quote.
+        ['”'] = '"' , // Right double quotation mark -> ASCII double quote.
+        ['’'] = '\'', // Right single quotation mark -> ASCII apostrophe.
+        ['゙'] = '゛', // NFKC halfwidth voiced sound mark -> fullwidth voiced sound mark.
+        ['゚'] = '゜'  // NFKC halfwidth semi-voiced sound mark -> fullwidth semi-voiced sound mark.
     };
 
     /// <summary>Normalizes the given text: first applies Unicode NFKC (compatibility)
@@ -29,10 +29,8 @@ public static class StringExtensions
         => text.Normalize(NormalizationForm.FormKC)
                .NormalizeWithCharacterTable();
 
-    /// <summary>
-    /// Replaces every character found in <see cref="characterTable"/> with its
-    /// mapped replacement character.
-    /// </summary>
+    /// <summary>Replaces every character found in <see cref="characterTable"/> with its
+    /// mapped replacement character.</summary>
     static string NormalizeWithCharacterTable(this string text)
     {
         foreach (var pair in characterTable)
@@ -46,6 +44,13 @@ public static class StringExtensions
 static class Program
 {
     const string ApplicationName = "Shos.Normalize";
+    static readonly string[] textFormats = [
+        DataFormats.Text        ,
+        DataFormats.UnicodeText ,
+        DataFormats.OemText     ,
+        DataFormats.StringFormat
+    ];
+    static readonly HashSet<string> allowedFormats = [.. textFormats, DataFormats.Locale];
 
     // STAThread is required because Clipboard access uses COM, which needs
     // the calling thread to run in a single-threaded apartment.
@@ -61,10 +66,9 @@ static class Program
             if (string.IsNullOrEmpty(text))
                 return;
 
-            // Normalize the text.
-            text = text.NormalizeEx();
-            // Write the text back to the clipboard.
-            Clipboard.SetText(text);
+            var normalized = text.NormalizeEx();
+            if (normalized != text)
+                Clipboard.SetText(normalized);
         } catch (Exception exception) {
             ShowError(exception.Message);
         }
@@ -77,18 +81,7 @@ static class Program
         var data = Clipboard.GetDataObject();
         var formats = data?.GetFormats(autoConvert: false) ?? [];
 
-        // The text formats we know how to normalize.
-        string[] textFormats = [
-            DataFormats.Text        ,
-            DataFormats.UnicodeText ,
-            DataFormats.OemText     ,
-            DataFormats.StringFormat
-        ];
-
-        // Bail out if there is no data, or if none of the supported text formats
-        // are present. Other accompanying formats (e.g. HTML, RTF, images) that
-        // often ride along with plain text are ignored rather than rejected.
-        if (formats.Length == 0 || !textFormats.Any(format => formats.Contains(format)))
+        if (!HasOnlySupportedTextFormats(formats))
             return string.Empty;
 
         // Pick the first supported text format present on the clipboard and read its content.
@@ -98,6 +91,11 @@ static class Program
                               .FirstOrDefault();
         return text ?? string.Empty;
     }
+
+    static bool HasOnlySupportedTextFormats(string[] formats)
+        => formats.Length > 0
+        && formats.Any(format => textFormats.Contains(format))
+        && formats.All(allowedFormats.Contains);
 
     /// <summary>Writes an error message to the console using a red-on-black color scheme.</summary>
     static void ShowError(string message)
