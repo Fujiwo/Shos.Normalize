@@ -93,9 +93,9 @@ static class Program
     }
 
     static bool HasOnlySupportedTextFormats(string[] formats)
-        => formats.Length > 0
-        && formats.Any(format => textFormats.Contains(format))
-        && formats.All(allowedFormats.Contains);
+        => formats.Length > 0                                  &&
+           formats.Any(format => textFormats.Contains(format)) &&
+           formats.All(allowedFormats.Contains);
 
     /// <summary>Writes an error message to the console using a red-on-black color scheme.</summary>
     static void ShowError(string message)

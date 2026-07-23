@@ -225,6 +225,41 @@ public sealed class Test1
     public void DiacriticTest() => Test(diacriticTable);
 
     [TestMethod]
+    public void LongSentenceTest_MixedFullWidthAndPunctuation()
+    {
+        const string input    = "これは　テストです！　“Ｈｅｌｌｏ，　Ｗｏｒｌｄ”という言葉と，価格は￥１，０００です。";
+        const string expected = "これは テストです! \"Hello, World\"という言葉と,価格は\\1,000です。";
+
+        Assert.AreEqual(expected, input.NormalizeEx());
+    }
+
+    [TestMethod]
+    public void LongSentenceTest_HalfWidthKatakanaSentence()
+    {
+        const string input    = "ｺﾝﾆﾁﾊ｡ﾜﾀｼﾊﾌﾟﾛｸﾞﾗﾏｰﾃﾞｽ｡ﾄﾞｳｿﾞﾖﾛｼｸｵﾈｶﾞｲｼﾏｽ｡";
+        const string expected = "コンニチハ。ワタシハプログラマーデス。ドウゾヨロシクオネガイシマス。";
+
+        Assert.AreEqual(expected, input.NormalizeEx());
+    }
+
+    [TestMethod]
+    public void LongSentenceTest_QuotesAndApostrophesInEnglishSentence()
+    {
+        const string input    = "She said, “It’s a beautiful day,” and then she smiled — didn’t she?";
+        const string expected = "She said, \"It's a beautiful day,\" and then she smiled — didn't she?";
+
+        Assert.AreEqual(expected, input.NormalizeEx());
+    }
+
+    [TestMethod]
+    public void LongSentenceTest_AlreadyNormalizedTextRemainsUnchanged()
+    {
+        const string input = "This sentence is already fully normalized, using only ASCII characters, digits like 12345, and punctuation such as commas, periods, and \"quotes\".";
+
+        Assert.AreEqual(input, input.NormalizeEx());
+    }
+
+    [TestMethod]
     public void ClipboardFormatsTest()
     {
         AssertSupportedClipboardFormats(true, DataFormats.UnicodeText);
