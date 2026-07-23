@@ -5,14 +5,20 @@ namespace Shos.Normalize;
 public static class StringExtensions
 {
     static readonly Dictionary<char, char> characterTable = new() {
+        ['￥'] = '\\',
         ['“'] = '"',
         ['”'] = '"',
-        ['’'] = '\''
+        ['’'] = '\'',
+        ['ﾞ'] = '゛',
+        ['ﾟ'] = '゜'
     };
  
-    public static string Normalize(string text)
+    public static string Normalize(this string text)
+        => text.Normalize(NormalizationForm.FormKC)
+               .NormalizeWithCharacterTable();
+
+    static string NormalizeWithCharacterTable(this string text)
     {
-        text = text.Normalize(NormalizationForm.FormKC);
         foreach (var pair in characterTable)
             text = text.Replace(pair.Key, pair.Value);
         return text;

@@ -4,5 +4,6 @@
     <File Path="README.jp.md" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="Shos.Normalize.Test/Shos.Normalize.Test.csproj" Id="7494f248-4dd6-409f-866a-98d1eb15c057" />
   <Project Path="Shos.Normalize/Shos.Normalize.csproj" />
 </Solution>
