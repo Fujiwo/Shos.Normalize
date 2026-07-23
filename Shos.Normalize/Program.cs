@@ -2,15 +2,26 @@
 
 namespace Shos.Normalize;
 
-static class Program
+public static class StringExtensions
 {
-    const string ApplicationName = "Shos.Normalize";
-
     static readonly Dictionary<char, char> characterTable = new() {
         ['“'] = '"',
         ['”'] = '"',
         ['’'] = '\''
     };
+ 
+    public static string Normalize(string text)
+    {
+        text = text.Normalize(NormalizationForm.FormKC);
+        foreach (var pair in characterTable)
+            text = text.Replace(pair.Key, pair.Value);
+        return text;
+    }
+}
+
+static class Program
+{
+    const string ApplicationName = "Shos.Normalize";
 
     [STAThread]
     static void Main()
@@ -39,20 +50,10 @@ static class Program
             if (string.IsNullOrEmpty(text))
                 return;
 
-            text = Normalize(text);
-
-            Clipboard.SetText(text);
+            Clipboard.SetText(text.Normalize());
         } catch (Exception exception) {
             ShowError(exception.Message);
         }
-    }
-
-    static string Normalize(string text)
-    {
-        text = text.Normalize(NormalizationForm.FormKC);
-        foreach (var pair in characterTable)
-            text = text.Replace(pair.Key, pair.Value);
-        return text;
     }
 
     static void ShowError(string message)
