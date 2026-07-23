@@ -5,8 +5,11 @@ Shos.Normalize is a Windows utility that normalizes text in the clipboard. It is
 ## Features
 
 - Applies Unicode NFKC normalization through `NormalizationForm.FormKC`.
+- Converts the yen sign (`￥`) to the ASCII backslash (`\`).
 - Converts left and right double quotation marks (`“` and `”`) to the ASCII double quotation mark (`\"`).
 - Converts the right single quotation mark (`’`) to the ASCII apostrophe (`'`).
+- Converts the half-width voiced sound mark (`ﾞ`) to the full-width voiced sound mark (`゛`).
+- Converts the half-width semi-voiced sound mark (`ﾟ`) to the full-width semi-voiced sound mark (`゜`).
 - Processes only clipboard data containing supported text formats, optionally accompanied by locale information, and writes the normalized result back to the clipboard.
 
 ## Requirements
@@ -20,7 +23,7 @@ Shos.Normalize is a Windows utility that normalizes text in the clipboard. It is
 2. Run `Shos.Normalize.exe`.
 3. Paste the normalized text wherever it is needed.
 
-The application exits without changing the clipboard when no supported text is available, when the text is empty, or when the clipboard also contains an unsupported format such as an image, file list, or rich text. It writes an error message to the console if an exception occurs during processing.
+The application exits without changing the clipboard when no supported text format is available or when the text is empty. Other accompanying clipboard formats (such as HTML, rich text, or images) are ignored as long as a supported text format is present. It writes an error message to the console if an exception occurs during processing.
 
 ## Build
 

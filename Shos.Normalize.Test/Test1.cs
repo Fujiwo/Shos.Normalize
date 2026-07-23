@@ -226,6 +226,6 @@ public sealed class Test1
     static void Test(Dictionary<string, string> table)
     {
         foreach (var pair in table)
-            Assert.AreEqual(pair.Value, StringExtensions.Normalize(pair.Key), $"Failed for '{pair.Key}'");
+            Assert.AreEqual(pair.Value, pair.Key.NormalizeEx(), $"Failed for '{pair.Key}'");
     }
 }
